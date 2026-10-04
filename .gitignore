@@ -1,9 +1,13 @@
 node_modules/
 dist/
 .venv/
+.venv1/
+.idea/
+.test-tmp*/
+.local-backups/
 __pycache__/
 .pytest_cache/
-backend/data/
+data/
 .env
 *.log
 test-results/

@@ -24,15 +24,17 @@ engine = OracleEngine(settings)
 model = ModelClient(settings)
 STATE_LOCK = RLock()
 app = FastAPI(title='Lernraum · SQL Tutor')
+LOCAL_ORIGINS = {
+    'http://localhost:5173', 'http://127.0.0.1:5173',
+    'http://localhost:8000', 'http://127.0.0.1:8000',
+}
 
 
 class LocalOnly(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         host = request.url.hostname
         origin = request.headers.get('origin')
-        if host not in {'localhost', '127.0.0.1'} or (origin and origin not in {
-            'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:8000', 'http://127.0.0.1:8000'
-        }):
+        if host not in {'localhost', '127.0.0.1'} or (origin and origin not in LOCAL_ORIGINS):
             from starlette.responses import JSONResponse
             return JSONResponse({'detail': 'Nur lokaler Zugriff erlaubt.'}, status_code=403)
         return await call_next(request)

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test('Produktions-PWA: Manifest, Offline-Shell und kein API-Cache',async({page})=>{
-  await page.goto('http://127.0.0.1:8000/')
+  await page.goto('http://127.0.0.1:8002/')
   await expect(page.getByRole('heading',{name:'SQL verstehen. Selbstständig anwenden.'})).toBeVisible()
   const manifest = await page.evaluate(async()=>{
     const href = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')!.href

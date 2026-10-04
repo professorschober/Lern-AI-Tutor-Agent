@@ -9,4 +9,5 @@ os.environ['LLM_API_KEY']=''
 from app import main
 from .fixtures import FixtureEngine
 main.engine=FixtureEngine()
+main.LOCAL_ORIGINS.update({'http://127.0.0.1:8002', 'http://127.0.0.1:5174'})
 app=main.app

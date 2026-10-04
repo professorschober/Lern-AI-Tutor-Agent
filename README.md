@@ -8,19 +8,31 @@ Voraussetzungen: Python 3.11 oder neuer, Node.js 20.19 oder neuer, erreichbare O
 
 ```powershell
 # Im Projektordner:
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r backend\requirements.lock
+python -m venv backend\.venv1
+.\backend\.venv1\Scripts\python.exe -m pip install -r backend\requirements.lock
 Copy-Item backend\.env.example backend\.env
 cd frontend
 npm ci
 npm run build
 cd ..\backend
-..\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+.\.venv1\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Vor dem Backend-Start `backend/.env` bearbeiten. Falls `python` nicht im PATH liegt, den absoluten Pfad zur Python-Installation verwenden. Im Codex-Arbeitsplatz wurde die mitgelieferte Python-Laufzeit verwendet und `.venv` bereits eingerichtet.
+Vor dem Backend-Start `backend/.env` bearbeiten. Falls `python` nicht im PATH liegt, den absoluten Pfad zur Python-Installation verwenden. Die aktive Projektumgebung ist ausschließlich **backend/.venv1**. Die vorhandene Umgebung verwendet Python 3.13.15. Bereits vorhandene Umgebungen nicht erneut anlegen; nur bei einem frischen Checkout ist `python -m venv` nötig.
 
-Nach dem Build liefert das Backend auch die PWA aus: **http://127.0.0.1:8000**. API-Dokumentation: **http://127.0.0.1:8000/docs**. Backend immer aus `backend` starten, damit `.env` und das Datenverzeichnis richtig aufgelöst werden. Nur einen Uvicorn-Worker verwenden. Nicht auf `0.0.0.0` binden.
+### IntelliJ
+
+Backend und Frontend können getrennt geöffnet werden. Für das Backend als vorhandenen Interpreter **`backend/.venv1/Scripts/python.exe`** auswählen. Die mitgelieferte Run-Konfiguration **Backend (Uvicorn)** startet das Modul `uvicorn`, nicht `app/main.py` direkt. Arbeitsverzeichnis ist `backend`, Parameter sind `app.main:app --host 127.0.0.1 --port 8000 --reload`. Nach Änderungen an den IntelliJ-Projekteinstellungen das Backend-Projekt schließen und neu öffnen.
+
+Im geöffneten Backend-Terminal funktioniert alternativ:
+
+```powershell
+.\.venv1\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Im Frontend-Terminal `npm run dev` ausführen und http://127.0.0.1:5173 öffnen. Aus dem gesamten Projektordner startet `./start-local.ps1` den gebauten Prototyp, optional mit `-Reload`. Nur einen Backend-Prozess auf Port 8000 starten; bestehende Prozesse vorher mit Strg+C beenden. Lokale IntelliJ-Einstellungen und alle virtuellen Umgebungen werden von Git ausgeschlossen.
+
+Nach dem Build liefert das Backend auch die PWA aus: **http://127.0.0.1:8000**. API-Dokumentation: **http://127.0.0.1:8000/docs**. Die Startkonfiguration verwendet `backend` als Arbeitsverzeichnis. `.env` und relative Datenpfade werden unabhängig vom Arbeitsverzeichnis immer gegen `backend` aufgelöst. Nur einen Uvicorn-Worker verwenden. Nicht auf `0.0.0.0` binden.
 
 Für Frontend-Entwicklung zusätzlich in einem zweiten Terminal:
 
@@ -70,7 +82,7 @@ Der Prototyp hat keine Anmeldung. Die Verwaltungsansicht ist lokal zugänglich. 
 
 ```powershell
 cd backend
-..\.venv\Scripts\python.exe -m pytest -q
+.\.venv1\Scripts\python.exe -m pytest -q
 cd ..\frontend
 npm run build
 npx playwright install chromium
@@ -79,7 +91,7 @@ npm run test:e2e
 
 Browser-Tests starten einen **isolierten Testserver** mit synthetischen SQLite-Daten und der produktiven SQL-Validierungs-/Vergleichslogik. Das ist kein Oracle-Ersatz im normalen Betrieb. Tests umfassen 20 Aufgaben mit richtigen/falschen Lösungen auf zwei Datenvarianten, SQL-Schutzgrenzen, Uploads, Versionierung, Fortschritt, Modellrückfall, Desktop-/Mobilansicht und Verbindungsabbruch. Falls Chromium vorhanden ist, kann `PLAYWRIGHT_CHROMIUM_EXECUTABLE` auf dessen ausführbare Datei gesetzt werden.
 
-Vor Browser-Tests laufende Entwicklungsserver auf Ports 8000 und 5173 beenden. Die Testdaten werden in einem eigenen temporären Verzeichnis erstellt, nicht im produktiven Datenverzeichnis. `requirements.lock` und `frontend/package-lock.json` halten die geprüften Abhängigkeitsversionen fest.
+Browser-Tests verwenden eigene Ports **8002 und 5174**, damit deine Entwicklungsserver auf 8000 und 5173 weiterlaufen können. Die Testdaten werden in einem eigenen temporären Verzeichnis erstellt, nicht im produktiven Datenverzeichnis. `requirements.lock` und `frontend/package-lock.json` halten die geprüften Abhängigkeitsversionen fest.
 
 Vor echtem Einsatz offen: Verbindung zu deiner Oracle-Instanz, Prüfung der tatsächlichen Leserrechte, deine 20 fachlich freigegebenen Aufgaben, Modellqualität/-kosten sowie PWA-Installation in deinem Browser. Ein automatisierter Produktions-PWA-Test prüft zusätzlich Manifest, Service-Worker und Offline-App-Shell; eine echte Browserinstallation bleibt ein manueller Abnahmeschritt.
 
